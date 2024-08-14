@@ -31,16 +31,13 @@ def get_state(state_id):
     return jsonify(state.to_dict())
 
 
-@app_views.route('/states/<state_id>', methods=['DELETE'],
-                 strict_slashes=False)
+@app_views.route('/states/<state_id>', methods=['DELETE'], strict_slashes=False)
 @swag_from('documentation/state/delete_state.yml', methods=['DELETE'])
 def delete_state(state_id):
     """
     Deletes a State Object
     """
-
     state = storage.get(State, state_id)
-
     if not state:
         abort(404)
 
@@ -75,18 +72,18 @@ def put_state(state_id):
     Updates a State
     """
     state = storage.get(State, state_id)
-
     if not state:
         abort(404)
 
-    if not request.get_json():
+    data = request.get_json()
+    if not data:
         abort(400, description="Not a JSON")
 
     ignore = ['id', 'created_at', 'updated_at']
-
-    data = request.get_json()
     for key, value in data.items():
         if key not in ignore:
             setattr(state, key, value)
-    storage.save()
+
+    state.save()
+
     return make_response(jsonify(state.to_dict()), 200)
